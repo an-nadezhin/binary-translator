@@ -27,17 +27,17 @@ void op_out(CPU* cpu);
 
 int op_jmp(CPU* cpu, int pc);
 
-int op_je(CPU* cpu, int pc);
+bool op_je(CPU* cpu);
 
-int op_jne(CPU* cpu, int pc);
+bool op_jne(CPU* cpu);
 
-int op_ja(CPU* cpu, int pc);
+bool op_ja(CPU* cpu);
 
-int op_jae(CPU* cpu, int pc);
+bool op_jae(CPU* cpu);
 
-int op_jb(CPU* cpu, int pc);
+bool op_jb(CPU* cpu);
 
-int op_jbe(CPU* cpu, int yes, int no);
+bool op_jbe(CPU* cpu);
 
 void op_pop_ax(CPU* cpu);
 
@@ -79,6 +79,6 @@ void op_pop_deep(CPU* cpu, prog_ad arg);
 
 void op_drop(CPU* cpu, prog_ad arg);
 
-void print_dump(char* name, CPU* cpu);
+void print_dump(const char* name, CPU* cpu);
 
 #endif //TRANSLATOR_SEMANTIC_FUNCTION_H

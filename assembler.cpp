@@ -1,7 +1,7 @@
 #include <cstring>
 #include "CPU.h"
 
-#define DEF_CMD(num, name, num_arg, code)  name,
+#define DEF_CMD(num, name, num_arg, code, stack_incr)  name,
 
 const char *names[] = {
 #include "commands.h"
@@ -10,13 +10,22 @@ const char *names[] = {
 #undef DEF_CMD
 
 
-#define DEF_CMD(num, name, num_arg, code) num_arg,
+#define DEF_CMD(num, name, num_arg, code, stack_incr) num_arg,
 
 int num_args[] = {
 #include "commands.h"
 };
 
 #undef DEF_CMD
+
+#define DEF_CMD(num, name, num_arg, code, stack_incr) stack_incr,
+
+int stack_incrs[] = {
+#include "commands.h"
+};
+
+#undef DEF_CMD
+
 
 bool assembler(const char *filenameIN, const char *filenameOUT) {
 

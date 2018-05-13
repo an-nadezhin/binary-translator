@@ -38,7 +38,7 @@ void CPU_init(CPU *cpu) {
 
 int CPU_calc_sum(CPU *cpu) {
 
-#define DEF_CMD(num, name, num_arg, code)               \
+#define DEF_CMD(num, name, num_arg, code, stack_incr)   \
             case num:                                   \
             {                                           \
                 code                                    \

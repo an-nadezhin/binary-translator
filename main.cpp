@@ -2,33 +2,50 @@
 #include "CPU.h"
 #include <vector>
 #include "binary-translator.h"
+#include "semantic_function_2.h"
 #include <algorithm>
 
-extern void func_0(CPU *cpu);
+extern double* func_0(double, double*);
 
 void print_code(std::vector<Function *> *funcs);
 
 std::vector<Function *> *find_functions(ivec &vec);
 
+void gen_code2(std::vector<Function *> *funcs, const char* filename);
+
 std::vector<int> *read_code();
 
 void test_fact(int n);
 
+void test_fact2(int n);
+
+void gen_code(std::vector<Function *> *funcs, const char* filename);
+
+
 int main(int argc, char *argv[]) {
     std::vector<int> *vec = read_code();
     std::vector<Function *> *functions = find_functions(*vec);
-    print_code(functions);
-    old_main(argc, argv);
-    test_fact(2);
+    gen_code2(functions, "../fact1.cpp");
+  //  old_main(argc, argv);
+    test_fact2(5);
 //    return old_main(argc, argv);
 }
 
+
+void test_fact2(int n) {
+    CPU_init(&cpu);
+    cpu.ax = n;
+    func_0(NAN, cpu.stack.data - 2);
+}
+
+/*
 void test_fact(int n) {
     CPU cpu;
     CPU_init(&cpu);
     cpu.ax = n;
-    func_0(&cpu);
+//    func_0(NAN, cpu.stack.data - 2);
 }
+*/
 
 std::vector<Function *> *find_functions(ivec &vec) {
     ivec vec_call;
@@ -88,4 +105,45 @@ void print_code(std::vector<Function *> *funcs) {
         (*funcs)[i]->print_code();
         std::cout << std::endl;
     }
+}
+
+void gen_code(std::vector<Function *> *funcs, const char* filename) {
+    FILE* out = fopen(filename, "w+");
+    fprintf(out, "#include \"semantic_function.h\"\n\n");
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_decl(out);
+    }
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_code1(out);
+        fprintf(out, "\n");
+    }
+    fclose(out);
+}
+
+
+void gen_code1(std::vector<Function *> *funcs, const char* filename) {
+    FILE* out = fopen(filename, "w+");
+    fprintf(out, "#include \"semantic_function.h\"\n\n");
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_decl(out);
+    }
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_code1(out);
+        fprintf(out, "\n");
+    }
+    fclose(out);
+}
+
+
+void gen_code2(std::vector<Function *> *funcs, const char* filename) {
+    FILE* out = fopen(filename, "w+");
+    fprintf(out, "#include \"semantic_function_2.h\"\n\n");
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_decl2(out);
+    }
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_code2(out);
+        fprintf(out, "\n");
+    }
+    fclose(out);
 }

@@ -58,35 +58,41 @@ int op_jmp(CPU* cpu, int pc) {
     return DEST;
 }
 
-int op_je(CPU* cpu, int pc) {
-    READ_EL if(num_2 == num_1) DEST else pc++;
-    return pc;
+
+bool op_je(CPU* cpu) {
+    print_dump("op_je", cpu);
+    READ_EL
+    return num_2 == num_1;
 }
 
-int op_jne(CPU* cpu, int pc) {
-    READ_EL if(num_2 != num_1) DEST else pc++;
-    return pc;
+bool op_jne(CPU* cpu) {
+    print_dump("op_jne", cpu);
+    READ_EL
+    return num_2 != num_1;
 }
 
-int op_ja(CPU* cpu, int pc) {
-    READ_EL if(num_2 > num_1) DEST else pc++;
-    return pc;
+bool op_ja(CPU* cpu) {
+    print_dump("op_ja", cpu);
+    READ_EL
+    return num_2 > num_1;
 }
 
-int op_jae(CPU* cpu, int pc) {
-    READ_EL if(num_2 >= num_1) DEST else pc++;
-    return pc;
+bool op_jae(CPU* cpu) {
+    print_dump("op_jae", cpu);
+    READ_EL
+    return num_2 >= num_1;
 }
 
-int op_jb(CPU* cpu, int pc) {
-    READ_EL if(num_2 < num_1) DEST else pc++;
-    return pc;
+bool op_jb(CPU* cpu) {
+    print_dump("op_jb", cpu);
+    READ_EL
+    return num_2 < num_1;
 }
 
-int op_jbe(CPU* cpu, int yes, int no ) {
+bool op_jbe(CPU* cpu) {
     print_dump("op_jbe", cpu);
     READ_EL
-    return num_2 <= num_1 ? yes : no;
+    return num_2 <= num_1;
 }
 
 void op_pop_ax(CPU* cpu) {
@@ -190,7 +196,7 @@ void op_drop(CPU* cpu, prog_ad arg) {
 }
 
 
-void print_dump(char* name, CPU* cpu) {
+void print_dump(const char* name, CPU* cpu) {
     std::cout << name;
     std:: cout << " :";
     for(int i = 0; i < cpu->stack.count; i++)

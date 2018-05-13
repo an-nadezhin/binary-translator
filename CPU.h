@@ -10,7 +10,7 @@
 #include <math.h>
 #include "assembler.h"
 
-#define DEF_CMD(num, name, num_arg, code) num,
+#define DEF_CMD(num, name, num_arg, code, stack_incr) num,
 
 enum {
 #include "commands.h"

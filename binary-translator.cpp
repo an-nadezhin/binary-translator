@@ -5,10 +5,13 @@
 #include <iostream>
 #include "binary-translator.h"
 #include "assembler.h"
+#include "CPU.h"
 
-Function::Function(int start, int end, ivec vec) : start_(start), vec_(end-start){
-    int  i = 0 ;
-    while(i < end-start) {
+#define DEBUG 0
+
+Function::Function(int start, int end, ivec vec) : start_(start), vec_(end - start) {
+    int i = 0;
+    while (i < end - start) {
         vec_[i] = vec[start + i];
         i++;
     }
@@ -35,4 +38,114 @@ void Function::print_code() {
         std::cout << std::endl;
     }
     std::cout << "}\n";
+}
+
+void Function::gen_decl(FILE *out) {
+    fprintf(out, "void func_%d(CPU* cpu);\n", start_);
+}
+
+void Function::gen_code1(FILE *out) {
+    int pc = start_;
+
+    fprintf(out, "\nvoid func_%d(CPU* cpu) {\n", start_);
+
+//    fprintf(out, "  int pc = %d;\n"
+    //               "  for(;;) {\n"
+    //               "    switch (pc) {\n", start_);
+
+    while (pc < start_ + vec_.size()) {
+        int op_code = vec_[pc - start_];
+        const char *name = names[op_code];
+        int amount_of_args = num_args[op_code];
+
+        //    fprintf(out, "      case %d:\n", pc);
+
+
+        switch (op_code) {
+            case CALL:
+                fprintf(out, "lb%d:\tprint_dump(\"call_%d\", cpu);", pc, start_);
+                fprintf(out, " func_%d(cpu);\n", vec_[pc + 1 - start_]);
+                break;
+            case RET:
+                fprintf(out, "lb%d:\tprint_dump(\"ret_%d\", cpu);"
+                             " return;\n", pc, start_);
+                break;
+            case JBE:
+            case JE:
+            case JA:
+            case JAE:
+            case JNE:
+            case JB:
+                fprintf(out, "lb%d:\tif(op_jbe(cpu)) goto lb%d;\n", pc, vec_[pc + 1 - start_]);
+                break;
+            default:
+                if (amount_of_args == 0) {
+                    fprintf(out, "lb%d:\top_%s(cpu);\n", pc, names[op_code]);
+                } else {
+                    fprintf(out, "lb%d:\top_%s(cpu", pc, names[op_code]);
+                    for (int i = 0; i < amount_of_args; i++) {
+                        int arg = vec_[pc + 1 + i - start_];
+                        fprintf(out, ", %d", arg);
+                    }
+                    fprintf(out, ");\n");
+                }
+        }
+        pc += amount_of_args + 1;
+    }
+    fprintf(out, "}\n");
+}
+
+
+void Function::gen_code2(FILE *out) {
+    int pc = start_;
+    fprintf(out, "\ndouble* func_%d(double top, double* stack) {\nbool cond;\n", start_);
+
+    while (pc < start_ + vec_.size()) {
+        int op_code = vec_[pc - start_];
+        const char *name = names[op_code];
+        int amount_of_args = num_args[op_code];
+
+        fprintf(out, "lb%d:\t", pc);
+        if(DEBUG)
+            fprintf(out, "print_dump2(\"%s\", top, stack);", name);
+
+        switch (op_code) {
+            case CALL:
+                fprintf(out, " stack = func_%d(top, stack);"
+                              " top = stack[1];\n", vec_[pc + 1 -start_]);
+                break;
+            case RET:
+                fprintf(out, " stack[1] = top;"
+                             " return stack;\n");
+                break;
+            case DROP:
+                fprintf(out, " stack += %d;\n", -vec_[pc + 1 - start_]);
+                break;
+            case JBE:
+            case JE:
+            case JA:
+            case JAE:
+            case JNE:
+            case JB:
+                fprintf(out, " cond = op2_%s(top, stack);"
+                             " top = stack[-1];"
+                             " stack -= 2;"
+                             " if(cond) goto lb%d;\n", name, vec_[pc + 1 - start_]);
+                break;
+            default:
+                fprintf(out, " top = op2_%s(top, stack", name);
+                for (int i = 0; i < amount_of_args; i++) {
+                    int arg = vec_[pc + 1 + i - start_];
+                    fprintf(out, ", %d", arg);
+                }
+                fprintf(out, "); stack += %d;\n", stack_incrs[op_code]);
+
+        }
+        pc += amount_of_args + 1;
+    }
+    fprintf(out, "}\n");
+}
+
+void Function::gen_decl2(FILE *out) {
+    fprintf(out, "double* func_%d(double top, double* stack);\n", start_);
 }
