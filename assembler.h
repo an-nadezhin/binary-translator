@@ -8,6 +8,7 @@
 extern int num_args[];
 extern const char * names [];
 extern int stack_incrs[];
+int amount_of_operation();
 
 bool assembler(const char *filenameIN, const char *filenameOUT);
 

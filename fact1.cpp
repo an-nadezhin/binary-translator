@@ -1,8 +1,10 @@
 #include "semantic_function_2.h"
 
+extern "C" {
 double* func_0(double top, double* stack);
 double* func_7(double top, double* stack);
 double* func_33(double top, double* stack);
+}
 
 double* func_0(double top, double* stack) {
 bool cond;

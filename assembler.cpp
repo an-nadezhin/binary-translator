@@ -92,9 +92,13 @@ bool assembler(const char *filenameIN, const char *filenameOUT) {
 
 
 int find_name(const char *name) {
-    for (int op = 0; op < sizeof(names) / sizeof(names[0]); op++) {
+    for (int op = 0; op < amount_of_operation(); op++) {
         if (!strcasecmp(name, names[op]))
             return op;
     }
     return -1;
+}
+
+int amount_of_operation() {
+return sizeof(names)/sizeof(names[0]);
 }

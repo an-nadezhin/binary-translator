@@ -20,6 +20,7 @@ public:
     void gen_code2(FILE *);
     void gen_decl(FILE *);
     void gen_decl2(FILE *);
+    void gen_code3(FILE *);
 };
 
 

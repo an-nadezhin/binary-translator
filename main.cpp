@@ -5,13 +5,17 @@
 #include "semantic_function_2.h"
 #include <algorithm>
 
-extern double* func_0(double, double*);
+extern "C" double *func2_0(double, double *);
+
+extern "C" double *func_0(double, double *);
+
+void gen_code3(std::vector<Function *> *funcs, const char *filename);
 
 void print_code(std::vector<Function *> *funcs);
 
 std::vector<Function *> *find_functions(ivec &vec);
 
-void gen_code2(std::vector<Function *> *funcs, const char* filename);
+void gen_code2(std::vector<Function *> *funcs, const char *filename);
 
 std::vector<int> *read_code();
 
@@ -19,15 +23,16 @@ void test_fact(int n);
 
 void test_fact2(int n);
 
-void gen_code(std::vector<Function *> *funcs, const char* filename);
+void gen_code(std::vector<Function *> *funcs, const char *filename);
 
 
 int main(int argc, char *argv[]) {
     std::vector<int> *vec = read_code();
     std::vector<Function *> *functions = find_functions(*vec);
     gen_code2(functions, "../fact1.cpp");
+    gen_code3(functions, "../fact2.s");
   //  old_main(argc, argv);
-    test_fact2(5);
+    test_fact2(atoi(argv[3]));
 //    return old_main(argc, argv);
 }
 
@@ -35,7 +40,8 @@ int main(int argc, char *argv[]) {
 void test_fact2(int n) {
     CPU_init(&cpu);
     cpu.ax = n;
-    func_0(NAN, cpu.stack.data - 2);
+
+    func2_0(NAN, cpu.stack.data - 2);
 }
 
 /*
@@ -107,8 +113,8 @@ void print_code(std::vector<Function *> *funcs) {
     }
 }
 
-void gen_code(std::vector<Function *> *funcs, const char* filename) {
-    FILE* out = fopen(filename, "w+");
+void gen_code(std::vector<Function *> *funcs, const char *filename) {
+    FILE *out = fopen(filename, "w+");
     fprintf(out, "#include \"semantic_function.h\"\n\n");
     for (int i = 0; i < funcs->size(); i++) {
         (*funcs)[i]->gen_decl(out);
@@ -121,8 +127,8 @@ void gen_code(std::vector<Function *> *funcs, const char* filename) {
 }
 
 
-void gen_code1(std::vector<Function *> *funcs, const char* filename) {
-    FILE* out = fopen(filename, "w+");
+void gen_code1(std::vector<Function *> *funcs, const char *filename) {
+    FILE *out = fopen(filename, "w+");
     fprintf(out, "#include \"semantic_function.h\"\n\n");
     for (int i = 0; i < funcs->size(); i++) {
         (*funcs)[i]->gen_decl(out);
@@ -135,15 +141,37 @@ void gen_code1(std::vector<Function *> *funcs, const char* filename) {
 }
 
 
-void gen_code2(std::vector<Function *> *funcs, const char* filename) {
-    FILE* out = fopen(filename, "w+");
+void gen_code2(std::vector<Function *> *funcs, const char *filename) {
+    FILE *out = fopen(filename, "w+");
     fprintf(out, "#include \"semantic_function_2.h\"\n\n");
+    fprintf(out, "extern \"C\" {\n");
     for (int i = 0; i < funcs->size(); i++) {
         (*funcs)[i]->gen_decl2(out);
     }
+    fprintf(out, "}\n");
     for (int i = 0; i < funcs->size(); i++) {
         (*funcs)[i]->gen_code2(out);
         fprintf(out, "\n");
     }
+
     fclose(out);
 }
+
+
+void gen_code3(std::vector<Function *> *funcs, const char *filename) {
+    FILE *out = fopen(filename, "w+");
+    fprintf(out, "\t\t.text\n");
+
+    for (int k = 0; k < amount_of_operation(); k++) {
+        fprintf(out, ".op_code_name_%s:\n", names[k]);
+        fprintf(out, "\t\t.string \"%s\"\n", names[k]);
+    }
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_code3(out);
+        fprintf(out, "\n");
+    }
+
+    fclose(out);
+}
+
+

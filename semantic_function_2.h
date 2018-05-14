@@ -9,6 +9,8 @@
 
 extern CPU cpu;
 
+extern "C" {
+
 double op2_nop(double top, double* stack);
 
 double op2_push(double top, double* stack, prog_ad arg);
@@ -75,8 +77,8 @@ double op2_push_deep(double top, double* stack, prog_ad arg);
 
 double op2_pop_deep(double top, double* stack, prog_ad arg);
 
-void print_dump(const char* name, CPU* cpu);
-
 void print_dump2(const char* name, double top, double* stack);
+
+}
 
 #endif //TRANSLATOR_SEMANTIC_FUNCTION_2_H
