@@ -7,6 +7,8 @@
 
 #include "CPU.h"
 
+extern clock_t start_time;
+
 extern CPU cpu;
 
 extern "C" {

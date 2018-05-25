@@ -3,6 +3,7 @@ push_bx
 push_cx
 call 1$
 out
+
 halt
 
 0:

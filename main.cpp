@@ -4,10 +4,13 @@
 #include "binary-translator.h"
 #include "semantic_function_2.h"
 #include <algorithm>
+#include "time.h"
 
 extern "C" double *func2_0(double, double *);
 
 extern "C" double *func_0(double, double *);
+
+extern "C" double *func3_0(double, double *);
 
 void gen_code3(std::vector<Function *> *funcs, const char *filename);
 
@@ -17,23 +20,34 @@ std::vector<Function *> *find_functions(ivec &vec);
 
 void gen_code2(std::vector<Function *> *funcs, const char *filename);
 
-std::vector<int> *read_code();
+std::vector<int> *read_code(char* filename);
 
 void test_fact(int n);
 
 void test_fact2(int n);
 
+void test_fact3(int n);
+
 void gen_code(std::vector<Function *> *funcs, const char *filename);
+
+void gen_code4(std::vector<Function *> *funcs, const char *filename);
 
 
 int main(int argc, char *argv[]) {
-    std::vector<int> *vec = read_code();
+//    old_main(argc, argv);
+    std::vector<int> *vec = read_code(argv[2]);
     std::vector<Function *> *functions = find_functions(*vec);
-    gen_code2(functions, "../fact1.cpp");
+    gen_code2(functions, "../generated.cpp");
     gen_code3(functions, "../fact2.s");
-  //  old_main(argc, argv);
-    test_fact2(atoi(argv[3]));
+    gen_code4(functions, "../generated.s");
+
+  //  clock_t t;
+ //  t = clock();
+    test_fact3(atoi(argv[3]));
+  //  test_fact2(atoi(argv[3]));
 //    return old_main(argc, argv);
+ //   t = clock() - t;
+ //   printf("clock : %d\ntime : %f\n", t, (float) t/CLOCKS_PER_SEC);
 }
 
 
@@ -41,8 +55,18 @@ void test_fact2(int n) {
     CPU_init(&cpu);
     cpu.ax = n;
 
-    func2_0(NAN, cpu.stack.data - 2);
+//    func2_0(NAN, cpu.stack.data - 2);
 }
+
+void test_fact3(int n) {
+    CPU_init(&cpu);
+    cpu.ax = n;
+
+    start_time = clock();
+    func3_0(NAN, cpu.stack.data - 2);
+
+}
+
 
 /*
 void test_fact(int n) {
@@ -64,9 +88,6 @@ std::vector<Function *> *find_functions(ivec &vec) {
         i += num_args[num] + 1;
     }
     std::sort(vec_call.begin(), vec_call.end());
-    //   for(i = 0; i < vec_call.size(); i++) {
-    //       std::cout << i << ") " << vec_call[i] << std::endl;
-    // }
     ivec vec_func;
     int last_call = -1;
     for (i = 0; i < vec_call.size(); i++) {
@@ -76,9 +97,6 @@ std::vector<Function *> *find_functions(ivec &vec) {
             last_call = this_call;
         }
     }
-    //  for(i = 0; i < vec_func.size(); i++) {
-//        std::cout << i << ")* " << vec_func[i] << std::endl;
-    //  }
 
     std::vector<Function *> *functions = new std::vector<Function *>(vec_func.size() + 1);
 
@@ -94,8 +112,8 @@ std::vector<Function *> *find_functions(ivec &vec) {
     return functions;
 }
 
-std::vector<int> *read_code() {
-    FILE *in = fopen("fact.obj", "r");
+std::vector<int> *read_code(char *filename) {
+    FILE *in = fopen(filename, "r");
     int num = 0;
     std::vector<int> *vec = new std::vector<int>();
     while (fscanf(in, "%d", &num) != EOF) {
@@ -175,3 +193,18 @@ void gen_code3(std::vector<Function *> *funcs, const char *filename) {
 }
 
 
+void gen_code4(std::vector<Function *> *funcs, const char *filename) {
+    FILE *out = fopen(filename, "w+");
+    fprintf(out, "\t\t.text\n");
+
+    for (int k = 0; k < amount_of_operation(); k++) {
+        fprintf(out, ".op_code_name_%s:\n", names[k]);
+        fprintf(out, "\t\t.string \"%s\"\n", names[k]);
+    }
+    for (int i = 0; i < funcs->size(); i++) {
+        (*funcs)[i]->gen_code4(out);
+        fprintf(out, "\n");
+    }
+
+    fclose(out);
+}

@@ -16,6 +16,8 @@
 
 CPU cpu;
 
+clock_t start_time;
+
 double op2_nop(double top, double* stack) {
     return top;
 }
@@ -141,6 +143,8 @@ double op2_st(double top, double* stack) {
 }
 
 double op2_halt(double top, double* stack) {
+    clock_t t = clock() - start_time;
+    printf("clock : %d\ntime : %f\n", t, (float) t/CLOCKS_PER_SEC);
     exit(0);
 }
 
@@ -176,20 +180,15 @@ double *get_elem_ptr(double *stack, int deep) {
 
 
 double op2_push_deep(double top, double* stack, prog_ad arg) {
-    //*++stack = top;
-    //return stack[-arg];
-
     int dep = arg;
     StackElem_t res = (dep != 1) ? *get_elem_ptr(stack, dep) : top;
-
     stack[1] = top;
     return res;
-        //int dep = arg; StackElem_t res = *get_elem_ptr(&cpu->stack, dep); SPUSH
 }
 
 
 double op2_pop_deep(double top, double* stack, prog_ad arg) {
-    stack[2-arg] = top;
+    stack[1-arg] = top;
     return *stack--;
 
 }

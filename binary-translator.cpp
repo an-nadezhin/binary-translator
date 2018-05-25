@@ -215,3 +215,137 @@ void Function::gen_code3(FILE *out) {
     //  fprintf(out, "}\n");
 }
 
+
+void Function::gen_code4(FILE *out) {
+    int pc = start_;
+    fprintf(out, "\t\t.global func3_%d\n", start_);
+    fprintf(out, "func3_%d:\n", start_);
+    fprintf(out, "\t\tpushq\t%%rbx\n");
+    fprintf(out, "\t\tmovq\t%%rdi, %%rbx\n");
+
+    while (pc < start_ + vec_.size()) {
+        int op_code = vec_[pc - start_];
+        const char *name = names[op_code];
+        int amount_of_args = num_args[op_code];
+
+        fprintf(out, "lb%d:", pc);
+        if (DEBUG) {
+            fprintf(out, "\tmovq\t%%xmm0, %%r12\n");
+            fprintf(out, "\t\tleaq\t.op_code_name_%s(%%rip), %%rdi\n", name);
+            fprintf(out, "\t\tmovq\t%%rbx, %%rsi\n");
+            fprintf(out, "\t\tcall\tprint_dump2@PLT\n");
+            fprintf(out, "\t\tmovq\t%%r12, %%xmm0\n\t");
+        }
+        switch (op_code) {
+            case PUSH_DEEP:
+                fprintf(out, "\tmovq\t%%xmm0, 8(%%rbx)\n");
+                fprintf(out, "\t\tmovq\t%d(%%rbx), %%xmm0\n", 8 * (2 - vec_[pc + 1 - start_]));
+                fprintf(out, "\t\tleaq\t8(%%rbx), %%rbx\n");
+                break;
+            case POP_DEEP:
+                fprintf(out, "\tmovq\t%%xmm0, %d(%%rbx)\n", 8 * (1 - vec_[pc + 1 - start_]));
+                fprintf(out, "\t\tmovsd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-8(%%rbx), %%rbx\n");
+                break;
+            case CALL:
+                fprintf(out, "\tmovq\t%%rbx, %%rdi\n");
+                fprintf(out, "\t\tcall\tfunc3_%d\n", vec_[pc + 1 - start_]);
+                fprintf(out, "\t\tmovq\t%%rax, %%rbx\n");
+                fprintf(out, "\t\tmovsd\t8(%%rax), %%xmm0\n");
+                break;
+            case RET:
+                fprintf(out, "\tmovsd\t%%xmm0, 8(%%rbx)\n");
+                fprintf(out, "\t\tmovq\t%%rbx, %%rax\n");
+                fprintf(out, "\t\tpopq\t%%rbx\n");
+                fprintf(out, "\t\tret\n");
+                break;
+            case DROP:
+                fprintf(out, "\tleaq\t%d(%%rbx), %%rbx\n", -vec_[pc + 1 - start_] * 8);
+                break;
+            case JMP:
+                fprintf(out, "\t\tjmp\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JBE:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tjae\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JE:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tje\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JA:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tjb\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JAE:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tjbe\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JNE:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tjne\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case JB:
+                fprintf(out, "\tucomisd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tmovsd\t-8(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-16(%%rbx), %%rbx\n");
+                fprintf(out, "\t\tja\t\tlb%d\n", vec_[pc + 1 - start_]);
+                break;
+            case ADD:
+                fprintf(out, "\taddsd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-8(%%rbx), %%rbx\n");
+                break;
+            case SUB:
+                fprintf(out, "\tmovsd\t(%%rbx), %%xmm1\n");
+                fprintf(out, "\t\tsubsd\t%%xmm0, %%xmm1\n");
+                fprintf(out, "\t\tmovapd\t%%xmm1, %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-8(%%rbx), %%rbx\n");
+                break;
+            case MUL:
+                fprintf(out, "\tmulsd\t(%%rbx), %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-8(%%rbx), %%rbx\n");
+                break;
+            case DIV:
+                fprintf(out, "\tmovsd\t(%%rbx), %%xmm1\n");
+                fprintf(out, "\t\tdivsd\t%%xmm0, %%xmm1\n");
+                fprintf(out, "\t\tmovapd\t%%xmm1, %%xmm0\n");
+                fprintf(out, "\t\tleaq\t-8(%%rbx), %%rbx\n");
+                break;
+            case NOP:
+                fprintf(out, "\n");
+                break;
+            case PUSH:
+                fprintf(out, "\tmovl\t$%d, %%esi\n", vec_[pc + 1 - start_]);
+                fprintf(out, "\t\tmovsd\t%%xmm0, 8(%%rbx)\n");
+                fprintf(out, "\t\tpxor\t%%xmm0, %%xmm0\n");
+                fprintf(out, "\t\tcvtsi2sd\t %%esi, %%xmm0\n");
+                fprintf(out, "\t\tleaq\t8(%%rbx), %%rbx\n");
+                break;
+            default:
+                fprintf(out, "\tmovq\t%%rbx, %%rdi\n");
+                for (int i = 0; i < amount_of_args; i++) {
+                    assert(i == 0);
+                    int arg = vec_[pc + 1 + i - start_];
+                    fprintf(out, "\t\tmovl\t$%d, %%esi\n", arg);
+                }
+                fprintf(out, "\t\tcall\top2_%s@PLT\n", name);
+                fprintf(out, "\t\tleaq\t%d(%%rbx), %%rbx\n", stack_incrs[op_code] * 8);
+        }
+        pc += amount_of_args + 1;
+    }
+}
+
+
+
+
+

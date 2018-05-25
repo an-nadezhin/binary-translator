@@ -9,7 +9,7 @@
 #include <cassert>
 #include <math.h>
 
-#define NMAX 100
+#define NMAX 10000
 
 const double POISON = atan(M_PI);
 

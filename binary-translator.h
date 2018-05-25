@@ -21,6 +21,7 @@ public:
     void gen_decl(FILE *);
     void gen_decl2(FILE *);
     void gen_code3(FILE *);
+    void gen_code4(FILE *);
 };
 
 
