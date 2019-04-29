@@ -76,115 +76,74 @@ func3_0:
 		pushq	%rbx
 		movq	%rdi, %rbx
 lb0:	movq	%rbx, %rdi
-		call	op2_push_ax@PLT
+		call	op2_in@PLT
 		leaq	8(%rbx), %rbx
 lb1:	movq	%rbx, %rdi
-		call	op2_push_bx@PLT
-		leaq	8(%rbx), %rbx
-lb2:	movq	%rbx, %rdi
-		call	op2_push_cx@PLT
-		leaq	8(%rbx), %rbx
-lb3:	movq	%rbx, %rdi
-		call	func3_7
+		call	func3_5
 		movq	%rax, %rbx
 		movsd	8(%rax), %xmm0
-lb5:	movq	%rbx, %rdi
+lb3:	movq	%rbx, %rdi
 		call	op2_out@PLT
 		leaq	-8(%rbx), %rbx
-lb6:	movq	%rbx, %rdi
+lb4:	movq	%rbx, %rdi
 		call	op2_halt@PLT
 		leaq	0(%rbx), %rbx
 
-		.global func3_7
-func3_7:
+		.global func3_5
+func3_5:
 		pushq	%rbx
 		movq	%rdi, %rbx
-lb7:
-lb8:	movl	$0, %esi
-		movsd	%xmm0, 8(%rbx)
-		pxor	%xmm0, %xmm0
-		cvtsi2sd	 %esi, %xmm0
-		leaq	8(%rbx), %rbx
-lb10:	movl	$1, %esi
-		movsd	%xmm0, 8(%rbx)
-		pxor	%xmm0, %xmm0
-		cvtsi2sd	 %esi, %xmm0
-		leaq	8(%rbx), %rbx
-lb12:	movq	%xmm0, -8(%rbx)
-		movsd	(%rbx), %xmm0
+lb5:
+lb6:	movq	%rbx, %rdi
+		call	op2_pop_ax@PLT
 		leaq	-8(%rbx), %rbx
+lb7:	movq	%rbx, %rdi
+		call	op2_push_ax@PLT
+		leaq	8(%rbx), %rbx
+lb8:	movq	%rbx, %rdi
+		call	op2_push_ax@PLT
+		leaq	8(%rbx), %rbx
+lb9:	movl	$1, %esi
+		movsd	%xmm0, 8(%rbx)
+		pxor	%xmm0, %xmm0
+		cvtsi2sd	 %esi, %xmm0
+		leaq	8(%rbx), %rbx
+lb11:	ucomisd	(%rbx), %xmm0
+		movsd	-8(%rbx), %xmm0
+		leaq	-16(%rbx), %rbx
+		jae		lb21
+lb13:	movq	%rbx, %rdi
+		call	op2_push_ax@PLT
+		leaq	8(%rbx), %rbx
 lb14:	movl	$1, %esi
 		movsd	%xmm0, 8(%rbx)
 		pxor	%xmm0, %xmm0
 		cvtsi2sd	 %esi, %xmm0
 		leaq	8(%rbx), %rbx
-lb16:	movq	%xmm0, 8(%rbx)
-		movq	-24(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb18:	movsd	(%rbx), %xmm1
-		divsd	%xmm0, %xmm1
-		movapd	%xmm1, %xmm0
-		leaq	-8(%rbx), %rbx
-lb19:	movq	%xmm0, 0(%rbx)
-		movsd	(%rbx), %xmm0
-		leaq	-8(%rbx), %rbx
-lb21:
-lb22:	movq	%xmm0, 8(%rbx)
-		movq	-16(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb24:	movl	$0, %esi
-		movsd	%xmm0, 8(%rbx)
-		pxor	%xmm0, %xmm0
-		cvtsi2sd	 %esi, %xmm0
-		leaq	8(%rbx), %rbx
-lb26:	ucomisd	(%rbx), %xmm0
-		movsd	-8(%rbx), %xmm0
-		leaq	-16(%rbx), %rbx
-		jae		lb47
-lb28:	movq	%xmm0, 8(%rbx)
-		movq	0(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb30:	movq	%xmm0, 8(%rbx)
-		movq	-8(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb32:	movq	%xmm0, 8(%rbx)
-		movq	-8(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb34:	mulsd	(%rbx), %xmm0
-		leaq	-8(%rbx), %rbx
-lb35:	addsd	(%rbx), %xmm0
-		leaq	-8(%rbx), %rbx
-lb36:	movq	%xmm0, -8(%rbx)
-		movsd	(%rbx), %xmm0
-		leaq	-8(%rbx), %rbx
-lb38:	movq	%xmm0, 8(%rbx)
-		movq	-16(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb40:	movl	$1, %esi
-		movsd	%xmm0, 8(%rbx)
-		pxor	%xmm0, %xmm0
-		cvtsi2sd	 %esi, %xmm0
-		leaq	8(%rbx), %rbx
-lb42:	movsd	(%rbx), %xmm1
+lb16:	movsd	(%rbx), %xmm1
 		subsd	%xmm0, %xmm1
 		movapd	%xmm1, %xmm0
 		leaq	-8(%rbx), %rbx
-lb43:	movq	%xmm0, -24(%rbx)
-		movsd	(%rbx), %xmm0
+lb17:	movq	%rbx, %rdi
+		call	func3_5
+		movq	%rax, %rbx
+		movsd	8(%rax), %xmm0
+lb19:	mulsd	(%rbx), %xmm0
 		leaq	-8(%rbx), %rbx
-lb45:		jmp		lb21
-lb47:
-lb48:	movq	%xmm0, 8(%rbx)
-		movq	0(%rbx), %xmm0
-		leaq	8(%rbx), %rbx
-lb50:	movq	%rbx, %rdi
-		call	op2_out@PLT
+lb20:	movsd	%xmm0, 8(%rbx)
+		movq	%rbx, %rax
+		popq	%rbx
+		ret
+lb21:
+lb22:	movq	%rbx, %rdi
+		call	op2_pop_cx@PLT
 		leaq	-8(%rbx), %rbx
-lb51:	movq	%xmm0, 8(%rbx)
-		movq	0(%rbx), %xmm0
+lb23:	movl	$1, %esi
+		movsd	%xmm0, 8(%rbx)
+		pxor	%xmm0, %xmm0
+		cvtsi2sd	 %esi, %xmm0
 		leaq	8(%rbx), %rbx
-lb53:	leaq	-32(%rbx), %rbx
-lb55:	movsd	%xmm0, 8(%rbx)
+lb25:	movsd	%xmm0, 8(%rbx)
 		movq	%rbx, %rax
 		popq	%rbx
 		ret

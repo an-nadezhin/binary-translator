@@ -6,76 +6,30 @@
 #include <algorithm>
 #include "time.h"
 
-extern "C" double *func2_0(double, double *);
-
-extern "C" double *func_0(double, double *);
-
 extern "C" double *func3_0(double, double *);
-
-void gen_code3(std::vector<Function *> *funcs, const char *filename);
-
-void print_code(std::vector<Function *> *funcs);
 
 std::vector<Function *> *find_functions(ivec &vec);
 
-void gen_code2(std::vector<Function *> *funcs, const char *filename);
-
 std::vector<int> *read_code(char* filename);
 
-void test_fact(int n);
-
-void test_fact2(int n);
-
-void test_fact3(int n);
-
-void gen_code(std::vector<Function *> *funcs, const char *filename);
+void test(int n);
 
 void gen_code4(std::vector<Function *> *funcs, const char *filename);
 
 
 int main(int argc, char *argv[]) {
-//    old_main(argc, argv);
-    std::vector<int> *vec = read_code(argv[2]);
+    std::vector<int> *vec = read_code(argv[1]); // code in our architecture (fact.out)
     std::vector<Function *> *functions = find_functions(*vec);
-    gen_code2(functions, "../generated.cpp");
-    gen_code3(functions, "../fact2.s");
     gen_code4(functions, "../generated.s");
 
-  //  clock_t t;
- //  t = clock();
-    test_fact3(atoi(argv[3]));
-  //  test_fact2(atoi(argv[3]));
-//    return old_main(argc, argv);
- //   t = clock() - t;
- //   printf("clock : %d\ntime : %f\n", t, (float) t/CLOCKS_PER_SEC);
+    test(atoi(argv[2])); // argument push in ax, but may not be used
 }
 
-
-void test_fact2(int n) {
+void test(int n) {
     CPU_init(&cpu);
     cpu.ax = n;
-
-//    func2_0(NAN, cpu.stack.data - 2);
-}
-
-void test_fact3(int n) {
-    CPU_init(&cpu);
-    cpu.ax = n;
-
-    start_time = clock();
     func3_0(NAN, cpu.stack.data - 2);
-
 }
-
-
-/*
-void test_fact(int n) {
-    CPU cpu;
-    CPU_init(&cpu);
-    cpu.ax = n;
-//    func_0(NAN, cpu.stack.data - 2);
-}
-*/
 
 std::vector<Function *> *find_functions(ivec &vec) {
     ivec vec_call;
@@ -121,75 +75,6 @@ std::vector<int> *read_code(char *filename) {
     }
     fclose(in);
     return vec;
-}
-
-
-void print_code(std::vector<Function *> *funcs) {
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->print_code();
-        std::cout << std::endl;
-    }
-}
-
-void gen_code(std::vector<Function *> *funcs, const char *filename) {
-    FILE *out = fopen(filename, "w+");
-    fprintf(out, "#include \"semantic_function.h\"\n\n");
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_decl(out);
-    }
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_code1(out);
-        fprintf(out, "\n");
-    }
-    fclose(out);
-}
-
-
-void gen_code1(std::vector<Function *> *funcs, const char *filename) {
-    FILE *out = fopen(filename, "w+");
-    fprintf(out, "#include \"semantic_function.h\"\n\n");
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_decl(out);
-    }
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_code1(out);
-        fprintf(out, "\n");
-    }
-    fclose(out);
-}
-
-
-void gen_code2(std::vector<Function *> *funcs, const char *filename) {
-    FILE *out = fopen(filename, "w+");
-    fprintf(out, "#include \"semantic_function_2.h\"\n\n");
-    fprintf(out, "extern \"C\" {\n");
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_decl2(out);
-    }
-    fprintf(out, "}\n");
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_code2(out);
-        fprintf(out, "\n");
-    }
-
-    fclose(out);
-}
-
-
-void gen_code3(std::vector<Function *> *funcs, const char *filename) {
-    FILE *out = fopen(filename, "w+");
-    fprintf(out, "\t\t.text\n");
-
-    for (int k = 0; k < amount_of_operation(); k++) {
-        fprintf(out, ".op_code_name_%s:\n", names[k]);
-        fprintf(out, "\t\t.string \"%s\"\n", names[k]);
-    }
-    for (int i = 0; i < funcs->size(); i++) {
-        (*funcs)[i]->gen_code3(out);
-        fprintf(out, "\n");
-    }
-
-    fclose(out);
 }
 
 
